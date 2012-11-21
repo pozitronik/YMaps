@@ -1,12 +1,9 @@
-//Переделать в набор классов!
-
 function onDragEnd(event){
 	document.getElementById('position').value=event.originalEvent.target.geometry._C[0];
 }
 
 function mark_position(event){
 	document.getElementById('position').value=event.get('coordPosition');
-	
 }
 
 /**
@@ -29,20 +26,35 @@ function maps_init(){
  * @link http://api.yandex.ru/maps/doc/jsapi/2.x/ref/reference/Map.xml
  */
 function map_create (div_id,parameters,options,callback){
-	if (parameters===undefined) var parameters={};
-	if (parameters.center===undefined) {
-		parameters.center=[ymaps.geolocation.latitude, ymaps.geolocation.longitude];
-		if (parameters.zoom===undefined) parameters.zoom=ymaps.geolocation.zoom;
-	} else {
-		if (parameters.zoom===undefined) parameters.zoom=12;
-	}
-	if (parameters.type==undefined) parameters.type='yandex#map';
-		
-	if (options===undefined)options={maxZoom:23,minZoom:0};
+	var params=map_parameters (div_id,parameters);
+	if (options===undefined) options={maxZoom:23,minZoom:0};
 	if (MAPS[div_id]!==undefined) map_destroy(div_id);
-	MAPS[div_id] = new ymaps.Map(div_id,parameters,options);
+	MAPS[div_id] = new ymaps.Map(div_id,params,options);
 	if (callback!==undefined)MAPS[div_id].events.add('click',callback);
 }
+
+/**
+ * Устанавливает одну опцию карты
+ * @param div_id - id блочного элемента, обязательный параметр
+ * @param key - параметр
+ * @param value - значение 
+ * @link http://api.yandex.ru/maps/doc/jsapi/2.x/ref/reference/option.Manager.xml#set
+ */
+
+function map_set_option (div_id,key,value) {
+	MAPS[div_id].options.set(key,value);
+}
+
+/**
+ * Задаёт несколько опций карты через хэш
+ * @param div_id - id блочного элемента, обязательный параметр
+ * @param options - массив опций
+ * @link http://api.yandex.ru/maps/doc/jsapi/2.x/ref/reference/option.Manager.xml#set
+ */
+
+function map_set_options (div_id,options) {
+	MAPS[div_id].options.set(options);
+} 
 
 /**
  * Функция изменяет параметры уже созданной карты.
@@ -51,14 +63,15 @@ function map_create (div_id,parameters,options,callback){
  * @link http://api.yandex.ru/maps/doc/jsapi/2.x/dg/concepts/map.xml#parameters
  */
 function map_parameters (div_id,parameters){
-	if (parameters===undefined){
-		var zoom=(ymaps.geolocation.zoom)?ymaps.geolocation.zoom:10;
-		parameters={center:[ymaps.geolocation.latitude, ymaps.geolocation.longitude],zoom:zoom,type:'yandex#hybrid'};
+	if (parameters===undefined) var parameters={};
+	if (parameters.center===undefined) {
+		parameters.center=[ymaps.geolocation.latitude, ymaps.geolocation.longitude];
+		if (parameters.zoom===undefined) parameters.zoom=ymaps.geolocation.zoom;
+	} else {
+		if (parameters.zoom===undefined) parameters.zoom=12;
 	}
-	if (options===undefined)options={maxZoom:23,minZoom:0};
-	if (MAPS[div_id]!==undefined) return (0);
-	if (parameters[center]!==undefined)	MAPS[div_id].setCenter(parameters[center]);
-	
+	if (MAPS[div_id]===undefined) return (parameters);
+	if (parameters.center!==undefined) MAPS[div_id].setCenter(parameters.center);
 }
 
 /**
@@ -68,15 +81,15 @@ function map_parameters (div_id,parameters){
  * Значения массива должны быть в виде:<br>
  * {'behavior':state,...}<br>
  * где <b>behavior</b> - одно из поведений карты (см API), а <b>state</b> - состояние, в которое нужно переключить поведение (например, enable/disable).<br>
- * Вместо enable/disable допускается использование 1/0 и true/false соответственно
+ * Вместо enabled/disabled допускается использование 1/0 и true/false соответственно
  */
 function map_behavior(div_id,parameters){
 	if (parameters===undefined) return(0);
 	for (var behavior in parameters){
-		if (parameters[behavior]==='enable'||parameters[behavior]===1||parameters[behavior]===true){
-			MAPS[div_id].behaviors.enable(behavior);
-		} else if (parameters[behavior]==='disable'||parameters[behavior]===0||parameters[behavior]===false) {
-			MAPS[div_id].behaviors.disable(behavior);
+		if (parameters[behavior]==='enabled'||parameters[behavior]===1||parameters[behavior]===true){
+			if (!(MAPS[div_id].behaviors.isEnabled(behavior))) MAPS[div_id].behaviors.enable(behavior);
+		} else if (parameters[behavior]==='disabled'||parameters[behavior]===0||parameters[behavior]===false) {
+			if (MAPS[div_id].behaviors.isEnabled(behavior)) MAPS[div_id].behaviors.disable(behavior);
 		}
 	}
 }
@@ -90,12 +103,12 @@ function map_behavior(div_id,parameters){
  * {{'control':name,'value':state,'top': value,'left':value},{...}}<br>
  * где <b>control</b> - один из стандартных элементов управления, а <b>state</b> - допустимое для этого элемента действие (например enable/disable)<br>
  * Если параметры top и left не заданы, контрол располагается по умолчанию
- * Вместо enable/disable допускается использование 1/0 и true/false соответственно
+ * Вместо enabled/disabld допускается использование 1/0 и true/false соответственно
  */
-function map_control(div_id,parameters){
+function map_control_old(div_id,parameters){
 	if (parameters===undefined) return(0);
 	for (var control in parameters){
-		if (parameters[control]['state']==='enable'||parameters[control]['state']===1||parameters[control]['state']===true){
+		if (parameters[control]['state']==='enabled'||parameters[control]['state']===1||parameters[control]['state']===true){
 			if (parameters[control]['top']===undefined || parameters[control]['left']===undefined) {
 				var c=undefined;
 			} else {
@@ -103,8 +116,61 @@ function map_control(div_id,parameters){
 			}
 			MAPS[div_id].controls.add(parameters[control]['control'],c);
 			
-		} else if (parameters[control]['state']==='disable'||parameters[control]['state']===0||parameters[control]['state']===false) {
+		} else if (parameters[control]['state']==='disabled'||parameters[control]['state']===0||parameters[control]['state']===false) {
 			MAPS[div_id].controls.remove(parameters[control]['control']);
+		}
+	}
+}
+
+/**
+ * Добавление и удаление стандартных элементов управления
+ * @link http://api.yandex.ru/maps/doc/jsapi/2.x/dg/concepts/controls.xml
+ * @param div_id - контейнер карты
+ * @param parameters - массив контролов карты<br>
+ * Вместо enabled/disabld допускается использование 1/0 и true/false соответственно
+ */
+
+function map_control(div_id,parameters){
+	if (parameters===undefined) return(0);
+	for (var control in parameters){
+		if (parameters[control]['enabled']==='enabled'||parameters[control]['enabled']===1||parameters[control]['enabled']===true){
+			var params=parameters[control]['params'];
+			var options=parameters[control]['options'];
+			switch (control) {
+				case 'mapTools':
+					MAPS[div_id].controls.add(new ymaps.control.MapTools(params,options));
+				break;
+				case 'miniMap':
+					MAPS[div_id].controls.add(new ymaps.control.MiniMap(params,options));
+				break;
+				case 'routeEditor'://Добавление RouteEditor делается через ToolBar
+					MAPS[map].controls.add(new ymaps.control.ToolBar([new ymaps.control.RouteEditor(params)],options));
+				break;
+				case 'scaleLine':
+					MAPS[div_id].controls.add(new ymaps.control.ScaleLine(options));
+				break;
+				case 'searchControl':
+					MAPS[div_id].controls.add(new ymaps.control.SearchControl(options));
+				break;				
+				case 'smallZoomControl':
+					MAPS[div_id].controls.add(new ymaps.control.SmallZoomControl(options));
+				break;	
+				case 'trafficControl':
+					MAPS[div_id].controls.add(new ymaps.control.TrafficControl(params,options));
+				break;	
+				case 'typeSelector':
+					MAPS[div_id].controls.add(new ymaps.control.TypeSelector(params,options));
+				break;	
+				case 'zoomControl':
+					MAPS[div_id].controls.add(new ymaps.control.ZoomControl(options));
+				break;	
+								
+				default:
+					MAPS[div_id].controls.add(control);//Мы не знаем этот контрол, добавим по хешу
+				break;
+			}
+		} else if (parameters[control]['enabled']==='disabled'||parameters[control]['enabled']===0||parameters[control]['enabled']===false) {
+			MAPS[div_id].controls.remove(control);//Проверка наличия контрола в API не предусмотрена. Но оно, по крайней мере, не глючит, если мы удаляем несуществующий контрол
 		}
 	}
 }
@@ -118,9 +184,9 @@ function map_control(div_id,parameters){
  * Описание параметров: <a href='http://api.yandex.ru/maps/doc/jsapi/2.x/ref/reference/GeoObject.xml'>http://api.yandex.ru/maps/doc/jsapi/2.x/ref/reference/GeoObject.xml</a>
  * @param coordinates - координаты балуна. Если undefined - то балун создаётся в центре карты.
  */
-function map_baloon(div_id,data,options,coordinates){
+function map_balloon(div_id,coordinates,data,options){
 	if (data===undefined) return(0);
-	if (coordinates===undefined) coordinates=MAPS[div_id].getCenter();
+	if (coordinates===undefined||coordinates===null) coordinates=MAPS[div_id].getCenter();
 	if (options===undefined)options={autoPan:true};
 	MAPS[div_id].balloon.open(coordinates,data,options);
 }
@@ -135,7 +201,7 @@ function map_baloon(div_id,data,options,coordinates){
  * @param coordinates - координаты маркера. Если undefined - то маркер создаётся в центре карты.
  * @param onDragEnd - функция, вызываемая при окончании drag'n'drop
  */
-function map_placemark(div_id,data,options,coordinates,onDragEnd){
+function map_placemark(div_id,coordinates,data,options,onDragEnd){
 	if (data===undefined) return(0);
 	if (coordinates===undefined) coordinates=MAPS[div_id].getCenter();
 	if (options===undefined)options={preset: "twirl#yellowStretchyIcon",balloonCloseButton: true,hideIconOnBalloonOpen:false};
@@ -193,29 +259,14 @@ function map_placemark_collection(div_id,placemarks,options,bounds){
 	return (GOC);
 }
 
-/*function map_geoobject (div_id){
-	var myGeoObject = new ymaps.GeoObject({
-		geometry: {
-				type: "Point",
-				coordinates: [37.61, 55.75]
-		},
-		properties: {
-			
-			iconContent: "Всем смеяться",
-			hintContent: "Москва",
-			balloonContentHeader: "Москва",
-			balloonContentBody: "Столица России",
-			population: 11848762
-		}
-	}, {
-		iconImageHref: "http://bani/img/bath_ico.png",
-		iconImageSize: [19,26],
-		balloonContentFooterLayout: ymaps.templateLayoutFactory.createClass('население: $[properties.population], координаты: $[geometry.coordinates]'
-		),
-		hintHideTimeout: 0
-	});
-MAPS[div_id].geoObjects.add(myGeoObject);	
-}*/
+
+function map_geoobject (div_id,feature,options) {
+	if (feature===undefined) return (0);
+	//if (feature.geometry.coordinates===undefined) feature.geometry.coordinates=MAPS[div_id].getCenter();//API обрабатывает это самостоятельно
+	
+	var GO = new ymaps.GeoObject (feature,options);
+	MAPS[div_id].geoObjects.add(GO);
+}
 
 /**
  * Прямое геокодирование

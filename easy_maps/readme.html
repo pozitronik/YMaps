@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style type="text/css">
+body {
+	font-family: sans-serif;
+	font-size: large;
+}
+
+pre {
+	margin-left: 1em;
+	padding-left: 1em;
+	border-left: 2px solid silver;
+	overflow: auto;
+	background: #F4F4FF;
+}
+
+ul {
+	list-style: disc; outside;
+	margin-top: 10px;
+	font-family: monospace;
+}
+
+ul ul {
+	background: #eee;
+	font-<b>size</b>: medium;
+}
+
+ul ul ul {
+	background: #eaeaea;
+}
+
+ul ul ul ul {
+	background: #eee;
+}
+
+ul ul ul ul ul{
+	background: #dadada;
+}
+
+ul ul ul ul ul li{
+	padding-left: 10px;
+}
+
+</style>
+<title>Документация: фреймворк PHP Yandex Maps</title>
+</head>
+<body>
+<h1>Что это?</h1>
+PHP Yandex Maps (PYM) - фреймворк, позволяющий создавать карты на PHP. В качестве движка картографии используются Яндекс.Карты, однако с PYM работать проще и быстрее, чем с нативным JavaScript-API Яндекс.Карт.<br>
+PYM не является имплементацией API Яндекс.Карт, он лишь генерирует код этого API, который, как обычно, выполняется в браузере пользователя.<br>
+Работа с PYM не требует знаний JavaScript или API Яндекс.Карт. Однако, во избежание расхождений, названия функций, методов, переменных и констант аналогичны приведённым в <a href='http://api.yandex.ru/maps/doc/jsapi/2.x/'>Yandex Maps API 2.0</a>, так что документация API может служить дополнительной справкой (по крайней мере, до тех пор, пока у PYM не появится собственная документация соответствующего уровня).<br>
+  
+<h2>Как PYM работает?</h2>
+PYM реализует несколько групп объектов, соответствующих объектам Яндекс.Карт (например таких, как "карта", "элемент управления", "всплывающая подсказка" и т.п.), и свойств этих объектов. Эти объекты и их свойства транслируются в JavaScript-код, который выполняется браузером. 
+Описание всех объектов, их свойств и методов см. в разделе <a href='#glossary'>Справочник</a>.
+
+<h2>Подключение PYM к вашему проекту</h2>
+Укажите путь к файлу ymaps.php в директиве require_once или include_once, например:
+<pre class="php" style="font-family:monospace;"><span style="color: #b1b100;">require_once</span> <span style="color: #0000ff;">'ymaps.php'</span><span style="color: #339933;">;</span></pre>
+
+<h3>Примеры</h3>
+
+Создание простой карты:
+
+<pre class="php" style="font-family:monospace;">&lt;!-- Создадим блок, в котором будет отображаться карта --&gt;
+&lt;div id='map' style='width:100%; height:600px;'&gt;&lt;/div&gt;
+<span style="color: #000000; font-weight: bold;">&lt;?php</span>
+<span style="color: #000088;">$map</span> <span style="color: #339933;">=</span> <span style="color: #000000; font-weight: bold;">new</span> YMap<span style="color: #009900;">&#40;</span><span style="color: #0000ff;">'map'</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Создание объекта карты в блоке map.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">create</span><span style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Создание карты. Поскольку параметры не указаны, центр карты будет находиться по местоположению пользователя (определяется по IP-адресу).</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">draw</span><span style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Вставка кода карты.</span>
+<span style="color: #000000; font-weight: bold;">?&gt;</span></pre>
+
+Создание карты с элементами управления и изменёнными поведениями:
+
+<pre class="php" style="font-family:monospace;">&lt;!-- Создадим блок, в котором будет отображаться карта --&gt;
+&lt;div id='map' style='width:100%; height:600px;'&gt;&lt;/div&gt;
+<span style="color: #000000; font-weight: bold;">&lt;?php</span>
+<span style="color: #000088;">$map</span> <span style="color: #339933;">=</span> <span style="color: #000000; font-weight: bold;">new</span> YMap<span style="color: #009900;">&#40;</span><span style="color: #0000ff;">'map'</span><span style="color: #339933;">,</span><span style="color: #990000;">array</span><span style="color: #009900;">&#40;</span><span style="color: #0000ff;">&quot;init&quot;</span><span style="color: #339933;">=&gt;</span><span style="color: #cc66cc;">1</span><span style="color: #009900;">&#41;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Дополнительно укажем, что создавать карту нужно только после окончательной загрузки страницы.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">create</span><span style="color: #009900;">&#40;</span><span style="color:#800080;">55.75154541282902</span><span style="color: #339933;">,</span><span style="color:#800080;">37.61556470101905</span><span style="color: #339933;">,</span><span style="color: #cc66cc;">15</span><span style="color: #339933;">,</span>map_type_hybrid<span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Укажем координаты центра карты, уровень приближения и тип. Тип может быть задан как строкой, так и одной из констант map_type_*</span>
+<span style="color: #666666; font-style: italic;">//Добавим несколько элементов управления.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">controls</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">zoomControl</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">enabled</span><span style="color: #339933;">=</span><span style="color: #009900; font-weight: bold;">TRUE</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Включим элемент управления &quot;ползунок масштаба&quot;.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">controls</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">zoomControl</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">options</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">position</span><span style="color: #339933;">=</span><span style="color: #990000;">array</span><span style="color: #009900;">&#40;</span><span style="color: #0000ff;">'top'</span><span style="color: #339933;">=&gt;</span><span style="color: #cc66cc;">5</span><span style="color: #339933;">,</span> <span style="color: #0000ff;">'left'</span><span style="color: #339933;">=&gt;</span><span style="color: #cc66cc;">5</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Изменим его местоположение на левый верхний угол.</span>
+<span style="color: #666666; font-style: italic;">//Добавим элемент управления &quot;миникарта&quot;.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">controls</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">miniMap</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">state</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">type</span><span style="color: #339933;">=</span>map_type_publicmaphybrid<span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Укажем тип миникарты.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">controls</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">miniMap</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">state</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">expanded</span><span style="color: #339933;">=</span><span style="color: #009900; font-weight: bold;">FALSE</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Укажем, что миникарта после создания должна быть свёрнута.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">controls</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">miniMap</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">options</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">position</span><span style="color: #339933;">=</span><span style="color: #990000;">array</span><span style="color: #009900;">&#40;</span><span style="color: #0000ff;">'top'</span><span style="color: #339933;">=&gt;</span><span style="color: #cc66cc;">5</span><span style="color: #339933;">,</span> <span style="color: #0000ff;">'right'</span><span style="color: #339933;">=&gt;</span><span style="color: #cc66cc;">5</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Изменим местоположение миникарты на верхний правый угол.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">controls</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">miniMap</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">options</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">size</span><span style="color: #339933;">=</span><span style="color: #990000;">array</span><span style="color: #009900;">&#40;</span><span style="color: #cc66cc;">200</span><span style="color: #339933;">,</span><span style="color: #cc66cc;">160</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Зададим размер миникарты.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">controls</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">miniMap</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">options</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">zoomOffset</span><span style="color: #339933;">=</span><span style="color: #cc66cc;">3</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Зададим разность уровней масштабирования между основной картой и миникартой.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">controls</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">miniMap</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">enable</span><span style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Включим карту. Функции enable() и disable() можно использовать для любых элементов управления вместо enabled=TRUE и enabled=FALSE соответственно.</span>
+<span style="color: #666666; font-style: italic;">//Изменим некоторые поведения карты</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">behaviors</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">dblClickZoom</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">enabled</span><span style="color: #339933;">=</span><span style="color: #009900; font-weight: bold;">FALSE</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Выключим зумирование по двойному щелчку.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">behaviors</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">scrollZoom</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">enable</span><span style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Включим зумирование колёсиком мыши. Функции enable() и disable() можно использовать для любых поведений управления вместо enabled=TRUE и enabled=FALSE соответственно.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">behaviors</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">scrollZoom</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">options</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">speed</span><span style="color: #339933;">=</span><span style="color: #cc66cc;">1</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Установим скорость зумирования.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">draw</span><span style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span>
+<span style="color: #000000; font-weight: bold;">?&gt;</span></pre>
+
+Получение кода карты вместо его вывода:
+
+<pre class="php" style="font-family:monospace;"><span style="color: #000000; font-weight: bold;">&lt;?php</span>
+<span style="color: #000088;">$map</span> <span style="color: #339933;">=</span> <span style="color: #000000; font-weight: bold;">new</span> YMap<span style="color: #009900;">&#40;</span><span style="color: #0000ff;">'map'</span><span style="color: #339933;">,</span><span style="color: #990000;">array</span><span style="color: #009900;">&#40;</span><span style="color: #0000ff;">&quot;load&quot;</span><span style="color: #339933;">=&gt;</span><span style="color: #cc66cc;">2</span><span style="color: #339933;">,</span><span style="color: #0000ff;">&quot;init&quot;</span><span style="color: #339933;">=&gt;</span><span style="color: #cc66cc;">2</span><span style="color: #009900;">&#41;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//В параметре load указываем, что не нужно загружать код API Яндекс.Карт, в параметре init указываем, что сгенерированный код выполнять не нужно.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">create</span><span style="color: #009900;">&#40;</span><span style="color:#800080;">55.75154541282902</span><span style="color: #339933;">,</span><span style="color:#800080;">37.61556470101905</span><span style="color: #339933;">,</span><span style="color: #cc66cc;">15</span><span style="color: #339933;">,</span>map_type_hybrid<span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Укажем координаты центра карты, уровень приближения и тип. Тип может быть задан как строкой, так и одной из констант map_type_*</span>
+<span style="color: #000088;">$map_code</span><span style="color: #339933;">=</span><span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">draw</span><span style="color: #009900;">&#40;</span><span style="color: #009900; font-weight: bold;">true</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Возвращаем сгенерированный код карты в переменную $map_code. В случае, если при создании карты был указан параметр init=2, то функция в любом случае будет возвращать код, вместо того, чтобы выполнять его вставку.</span>
+<span style="color: #b1b100;">print</span> <span style="color: #0000ff;">&quot;&lt;pre&gt;<span style="color: #006699; font-weight: bold;">$map_code</span>&lt;/pre&gt;&quot;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Выведем сгенерированный код на страницу.</span>
+<span style="color: #000000; font-weight: bold;">?&gt;</span></pre>
+
+Работа с балуном:
+
+<pre class="php" style="font-family:monospace;">&lt;!-- Создадим блок, в котором будет отображаться карта --&gt;
+&lt;div id='map' style='width:100%; height:600px;'&gt;&lt;/div&gt;
+<span style="color: #000000; font-weight: bold;">&lt;?php</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">create</span><span style="color: #009900;">&#40;</span><span style="color:#800080;">55.75154541282902</span><span style="color: #339933;">,</span><span style="color:#800080;">37.61556470101905</span><span style="color: #339933;">,</span><span style="color: #cc66cc;">15</span><span style="color: #339933;">,</span>map_type_hybrid<span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Укажем координаты центра карты, уровень приближения и тип. Тип может быть задан как строкой, так и одной из констант map_type_*</span>
+<span style="color: #666666; font-style: italic;">//Добавим несколько элементов управления.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">controls</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">zoomControl</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">enabled</span><span style="color: #339933;">=</span><span style="color: #009900; font-weight: bold;">TRUE</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Включим элемент управления &quot;ползунок масштаба&quot;.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">controls</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">zoomControl</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">options</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">position</span><span style="color: #339933;">=</span><span style="color: #990000;">array</span><span style="color: #009900;">&#40;</span><span style="color: #0000ff;">'top'</span><span style="color: #339933;">=&gt;</span><span style="color: #cc66cc;">5</span><span style="color: #339933;">,</span> <span style="color: #0000ff;">'left'</span><span style="color: #339933;">=&gt;</span><span style="color: #cc66cc;">5</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Изменим его местоположение на левый верхний угол.</span>
+&nbsp;
+<span style="color: #000088;">$balloon</span><span style="color: #339933;">=</span><span style="color: #000000; font-weight: bold;">new</span> Balloon<span style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Создадим новый балун.</span>
+<span style="color: #666666; font-style: italic;">//Зададим содержимое балуна</span>
+<span style="color: #000088;">$balloon</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">SetData</span><span style="color: #009900;">&#40;</span><span style="color: #0000ff;">&quot;&lt;b&gt;Госуда́рственный Кремлёвский дворе́ц&lt;/b&gt; (до 1992 года — &lt;b&gt;Кремлёвский дворец съездов&lt;/b&gt;) построен в 1961 году под руководством архитектора Михаила Васильевича Посохина...&quot;</span><span style="color: #339933;">,</span>
+				<span style="color: #0000ff;">&quot;Дворец съездов&quot;</span><span style="color: #339933;">,</span>
+				<span style="color: #0000ff;">&quot;&lt;a href='http://ru.wikipedia.org/wiki/Дворец_съездов' style='float:right'&gt;Читать дальше&lt;/a&gt;&quot;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span>
+<span style="color: #000088;">$balloon</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">options</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">shadow</span><span style="color: #339933;">=</span><span style="color: #009900; font-weight: bold;">FALSE</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Выключим тень от балуна</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">balloon</span><span style="color: #009900;">&#40;</span><span style="color: #000088;">$balloon</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Связываем балун и карту</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">draw</span><span style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Вставка кода карты.</span>
+<span style="color: #000000; font-weight: bold;">?&gt;</span></pre>
+
+Работа с отметками:
+
+<pre class="php" style="font-family:monospace;">&lt;!-- Создадим блок, в котором будет отображаться карта --&gt;
+&lt;div id='map' style='width:100%; height:600px;'&gt;&lt;/div&gt;
+<span style="color: #000000; font-weight: bold;">&lt;?php</span>
+<span style="color: #000088;">$map</span> <span style="color: #339933;">=</span> <span style="color: #000000; font-weight: bold;">new</span> YMap<span style="color: #009900;">&#40;</span><span style="color: #0000ff;">'map'</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//В параметре load указываем, что не нужно загружать код API Яндекс.Карт, в параметре init указываем, что сгенерированный код выполнять не нужно.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">create</span><span style="color: #009900;">&#40;</span><span style="color:#800080;">55.75</span><span style="color: #339933;">,</span><span style="color:#800080;">37.61</span><span style="color: #339933;">,</span><span style="color: #cc66cc;">15</span><span style="color: #339933;">,</span>map_type_hybrid<span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Укажем координаты центра карты, уровень приближения и тип. Тип может быть задан как строкой, так и одной из констант map_type_*</span>
+<span style="color: #666666; font-style: italic;">//Добавим несколько элементов управления.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">controls</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">zoomControl</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">enabled</span><span style="color: #339933;">=</span><span style="color: #009900; font-weight: bold;">TRUE</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Включим элемент управления &quot;ползунок масштаба&quot;.</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">controls</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">zoomControl</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">options</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">position</span><span style="color: #339933;">=</span><span style="color: #990000;">array</span><span style="color: #009900;">&#40;</span><span style="color: #0000ff;">'top'</span><span style="color: #339933;">=&gt;</span><span style="color: #cc66cc;">5</span><span style="color: #339933;">,</span> <span style="color: #0000ff;">'left'</span><span style="color: #339933;">=&gt;</span><span style="color: #cc66cc;">5</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Изменим его местоположение на левый верхний угол.</span>
+<span style="color: #000088;">$placemark_centered</span><span style="color: #339933;">=</span><span style="color: #000000; font-weight: bold;">new</span> Placemark<span style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Создадим новый маркер без указания координат</span>
+<span style="color: #000088;">$hint</span><span style="color: #339933;">=</span><span style="color: #000000; font-weight: bold;">new</span> Hint<span style="color: #009900;">&#40;</span><span style="color: #0000ff;">'Этот маркер &lt;b&gt;всегда&lt;/b&gt; находится в центре карты'</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Создадим новый хинт</span>
+<span style="color: #000088;">$hint</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">options</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">hideTimeOut</span><span style="color: #339933;">=</span><span style="color: #cc66cc;">1</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Укажем, что хинт должен исчезать без задержки</span>
+<span style="color: #000088;">$placemark_centered</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">set_hint</span><span style="color: #009900;">&#40;</span><span style="color: #000088;">$hint</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Добавим хинт к маркеру</span>
+<span style="color: #000088;">$placemark_centered</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">options</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">preset</span><span style="color: #339933;">=</span><span style="color: #0000ff;">'twirl#darkblueStretchyIcon'</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Установим для хинта один из готовых презетов</span>
+<span style="color: #000088;">$placemark_centered</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">feature</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">properties</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">iconContent</span><span style="color: #339933;">=</span><span style="color: #0000ff;">'Центр'</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Установленный презет допускает текстовое содержимое внутри маркера, установим его</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">placemark</span><span style="color: #009900;">&#40;</span><span style="color: #000088;">$placemark_centered</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Добавим маркер на карту</span>
+<span style="color: #000088;">$placemark</span><span style="color: #339933;">=</span><span style="color: #000000; font-weight: bold;">new</span> Placemark<span style="color: #009900;">&#40;</span><span style="color:#800080;">55.75154541282902</span><span style="color: #339933;">,</span><span style="color:#800080;">37.61556470101905</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Создадим новый маркер с указанием координат</span>
+<span style="color: #000088;">$placemark</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">options</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">iconImageHref</span><span style="color: #339933;">=</span><span style="color: #0000ff;">'marker.png'</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Изменим иконку маркера.</span>
+<span style="color: #000088;">$balloon</span><span style="color: #339933;">=</span><span style="color: #000000; font-weight: bold;">new</span> Balloon<span style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Создадим новый балун.</span>
+<span style="color: #666666; font-style: italic;">//Зададим содержимое балуна</span>
+<span style="color: #000088;">$balloon</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">SetData</span><span style="color: #009900;">&#40;</span><span style="color: #0000ff;">&quot;&lt;b&gt;Госуда́рственный Кремлёвский дворе́ц&lt;/b&gt; (до 1992 года — &lt;b&gt;Кремлёвский дворец съездов&lt;/b&gt;) построен в 1961 году под руководством архитектора Михаила Васильевича Посохина...&quot;</span><span style="color: #339933;">,</span>
+				<span style="color: #0000ff;">&quot;Дворец съездов&quot;</span><span style="color: #339933;">,</span>
+				<span style="color: #0000ff;">&quot;&lt;a href='http://ru.wikipedia.org/wiki/Дворец_съездов' style='float:right'&gt;Читать дальше&lt;/a&gt;&quot;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span>
+<span style="color: #000088;">$placemark</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">set_balloon</span><span style="color: #009900;">&#40;</span><span style="color: #000088;">$balloon</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Добавим балун к маркеру</span>
+<span style="color: #000088;">$placemark</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">feature</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">properties</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">hintContent</span><span style="color: #339933;">=</span><span style="color: #0000ff;">&quot;Щелчок для подсказки&quot;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Можно задать содержимое всплывающей подсказки без создания объекта Hint</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">placemark</span><span style="color: #009900;">&#40;</span><span style="color: #000088;">$placemark</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Добавим маркер на карту</span>
+<span style="color: #000088;">$map</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">draw</span><span style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Вставка кода карты.</span>
+<span style="color: #000000; font-weight: bold;">?&gt;</span></pre>
+
+
+<h1><a id="glossary">Справочник</a></h1>
+
+<h2>Объекты</h2>
+
+<h2>Карта</h2>
+
+Карта - базовый объект, реализующий непосредственно карту. Объект реализован классом YMap.<br>
+При создании объекта ему передаются следующие параметры:<br>
+<ul>
+	<li><b><i>string</i></b> $div_id: id блочного элемента, в котором будет создана карта (обязательный параметр).</li>
+	<li><b><i>array</i></b> $options: массив опций создания карты:
+		<ul>
+			<li><b><i>integer</i></b> load: 0 (default) - подгрузка JS-кода Яндекс.Карт при создании объекта, 1 - при вызове карты, 2 - не загружать код (он может быть уже загружен).</li>
+			<li><b><i>integer</i></b> init: 0 (default) - выполнение кода после подгрузки JS-кода Яндекс.Карт, 1 - после загрузки страницы, 2 - не выполнять код.</li>
+		</ul>
+	Параметр может быть опущен частично или полностью.
+	</li>	
+</ul>
+Пример:<br>
+<pre class="php" style="font-family:monospace;"><span style="color: #000088;">$map</span> <span style="color: #339933;">=</span> <span style="color: #000000; font-weight: bold;">new</span> YMap<span style="color: #009900;">&#40;</span><span style="color: #0000ff;">'map'</span><span style="color: #339933;">,</span><span style="color: #990000;">array</span><span style="color: #009900;">&#40;</span><span style="color: #0000ff;">&quot;init&quot;</span><span style="color: #339933;">=&gt;</span><span style="color: #cc66cc;">0</span><span style="color: #339933;">,</span><span style="color: #0000ff;">&quot;load&quot;</span><span style="color: #339933;">=&gt;</span><span style="color: #cc66cc;">1</span><span style="color: #009900;">&#41;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
+
+<h4>Свойства</h4>
+<ul>
+	<li>behaviors: группа свойств, отвечающих за поведение карты.
+		<ul>
+			<li>dblClickZoom: управляет поведением "масштабирование карты двойным щелчком кнопки мыши".<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - включить поведение, FALSE (default) - выключить поведение.</li>
+					<li>options: параметры поведения:
+						<ul>
+							<li><b><i>bool</i></b> <b>centering</b>: TRUE (default) - при двойном щелчке мышью карта масштабируется так, что точка под курсором мыши становится новым центром карты, FALSE - точка под курсором мыши сохраняет свое положение при масштабировании двойным щелчком.</li>
+							<li><b><i>integer</i></b> <b>duration</b>: время анимации масштабирования двойным щелком кнопки мыши (0 - анимации нет). Значение по умолчанию: 200.</li>
+						</ul>
+					</li>	
+				</ul>
+			</li>
+			<li>drag: управляет поведением "перетаскивание карты с помощью мыши либо одиночного касания".<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE (default) - включить поведение, FALSE - выключить поведение.</li>
+					<li>options: параметры поведения:
+						<ul>
+							<li><b><i>string</i></b> <b>actionCursor</b>: курсор для поведения при перетаскивании карты. Значение по умолчанию: 'grabbing'.</li>
+							<li><b><i>string</i></b> <b>cursor</b>: курсор для поведения behavior.Drag при наведении на карту. Значение по умолчанию: 'grab'.</li>
+							<li><b><i>bool</i></b> <b>inertia</b>: включает кинетическую инерцию движения в конце перетаскивания. Значение по умолчанию: true.</li>
+							<li><b><i>integer</i></b> <b>inertiaDuration</b>: продолжительность инерции в мс. Значение по умолчанию: 400.</li>
+							<li><b><i>integer</i></b> <b>tremor</b>: минимальное смещение курсора в пикселях после нажатия кнопки мыши, после которого начинает двигаться карта. Значение по умолчанию: 2.</li>
+						</ul>
+					</li>	
+				</ul>
+			</li>
+			<li>leftMouseButtonMagnifier: управляет поведением "масштабирование карты при выделении области левой кнопкой мыши".<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - включить поведение, FALSE (default) - выключить поведение.</li>
+					<li>options: параметры поведения:
+						<ul>
+							<li><b><i>string</i></b> <b>actionCursor</b>: курсор во время выбора области для увеличения при включенном поведении. Значение по умолчанию: 'crosshair'.</li>
+							<li><b><i>string</i></b> <b>cursor</b>: курсор при включенном поведении. Значение по умолчанию: 'zoom'.</li>
+							<li><b><i>integer</i></b> <b>duration</b>: продолжительность анимации увеличения области при использовании поведения, мс. Значение по умолчанию: 300.</li>
+						</ul>
+					</li>	
+				</ul>
+			</li>
+			<li>multiTouch: управляет поведением "масштабирование карты мультисенсорным касанием".<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - включить поведение, FALSE (default) - выключить поведение.</li>
+					<li>options: параметры поведения:
+						<ul>
+							<li><b><i>integer</i></b> <b>tremor</b>: минимальное движение по экрану устройства (в пикселях), при котором сработает поведение. Значение по умолчанию: 2.</li>
+						</ul>
+					</li>	
+				</ul>
+			</li>
+			<li>rightMouseButtonMagnifier: управляет поведением "масштабирование карты при выделении области правой кнопкой мыши".<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - включить поведение, FALSE (default) - выключить поведение.</li>
+					<li>options: параметры поведения:
+						<ul>
+							<li><b><i>string</i></b> <b>actionCursor</b>: курсор во время выбора области для увеличения при включенном поведении. Значение по умолчанию: 'crosshair'.</li>
+							<li><b><i>integer</i></b> <b>duration</b>: продолжительность анимации при выделении области, мс. Значение по умолчанию: 300.</li>
+						</ul>
+					</li>	
+				</ul>
+			</li>
+			<li>routeEditor: управляет поведением "редактор маршрутов".<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - включить поведение, FALSE (default) - выключить поведение.</li>
+				</ul>
+			</li>
+			<li>ruler: управляет поведением "линейка". Позволяет отмечать на карте точки и отображать расстояния между ними.<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - включить поведение, FALSE (default) - выключить поведение.</li>
+				</ul></li>
+			<li>scrollZoom: управляет поведением "масштабирование карты колесом мыши".<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - включить поведение, FALSE (default) - выключить поведение.</li>
+					<li>options: параметры поведения:
+						<ul>
+							<li><b><i>integer</i></b> <b>maximumDelta</b>: максимальное возможное изменение, на которое можно изменить зум карты при одном событии скролла (непрерывным вращением колеса мыши). При достижении этого лимита карта перерисовывается (показываются тайлы для достигнутого уровня масштаба). Значение по умолчанию: 5.</li>
+							<li><b><i>integer</i></b> <b>speed</b>: скорость увеличения/уменьшения масштаба карты при включенном поведении, уровней масштаба в секунду. Значение по умолчанию: 5.</li>
+						</ul>
+					</li>	
+				</ul>
+			</li>
+		</ul>
+	</li>
+	<li>controls: свойства элементов управления картой.
+		<ul>
+			<li>mapTools: тулбар со стандартными кнопками.<br>Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - показать элемент управления, FALSE (default) - не показывать элемент управления.</li>
+					<li>params:
+						<ul>
+							<li><b><i>array</i></b> <b>items</b>: кнопки которые будут добавлены в тулбар. Можно использовать следующие ключи:
+								<ul>
+									<li>"default" - короткий синоним для стандартного набора кнопок;</li>
+									<li>"drag" - кнопка "Навигация";</li>
+									<li>"magnifier" - кнопка "Выделение";</li>
+									<li>"ruler" - кнопка "Линейка".</li>
+								</ul>
+							</li>	
+						</ul>
+					</li>
+					<li>options:
+						<ul>
+							<li><b><i>array</i></b> <b>position</b>: Положение элемента управления над картой. Задается в виде ассоциативного массива со следующими ключами:
+								<ul>
+									<li>top - отступ от верхнего края контейнера карты в пикселах;</li>
+									<li>right - отступ от правого края контейнера карты в пикселах;</li>
+									<li>bottom - отступ от нижнего края контейнера карты в пикселах;</li>
+									<li>left - отступ от левого края контейнера карты в пикселах.</li>
+								</ul>
+							Если при этом заданы одновременно и top, и bottom, то значение bottom игнорируется. Аналогично, если заданы одновременно и left, и right, то значение right игнорируется. Значение по умолчанию: <b><i>array</i></b> ("top"=&gt; 5, "right"=&gt; 5).
+							</li>
+						</ul>
+					</li>
+				</ul>	
+			</li>		
+			<li>miniMap: элемент управления "обзорная карта".<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - показать элемент управления, FALSE (default) - не показывать элемент управления.</li>
+					<li>state:
+						<ul>
+							<li><b><i>bool</i></b> <b>expanded</b>: true - обзорная карта развернута, false - свернута. Значение по умолчанию: true</li>
+							<li><b><i>array</i></b> <b>type</b>: Тип карты. Список доступных типов карты:
+								<ul>
+									<li>'yandex#map' - тип карты "схема";</li>
+									<li>'yandex#satellite' - тип карты "спутник";</li>
+									<li>'yandex#hybrid' - тип карты "гибрид";</li>
+									<li>'yandex#publicMap' - тип карты "народная карта";</li>
+									<li>'yandex#publicMapHybrid' - тип карты "народный гибрид".</li>
+								</ul>
+								Ключи 'yandex#publicMap' и 'yandex#publicMapHybrid' доступны только для России и Украины.<br>
+								Значение по умолчанию: 'yandex#map'
+							</li>
+						</ul>
+					</li>	
+					<li>options:
+						<ul>
+							<li><b><i>array</i></b> <b>position</b>: положение обзорной карты относительно контейнера основной карты. Значение по умолчанию: <b><i>array</i></b> ("left"=&gt; 5, "bottom"=&gt; 5)</li>
+							<li><b><i>array</i></b> <b>size</b>: размеры обзорной карты. Значение по умолчанию: <b><i>array</i></b> (128, 90).</li>
+							<li><b><i>integer</i></b> <b>zoomOffset</b>: разность уровней масштабирования обзорной карты и основной карты. Значение может быть отрицательным. Значение по умолчанию: 5.</li>
+						</ul>	
+					</li>	
+				</ul>
+			</li>
+			<li>routeEditor: элемент управления "Редактор маршрутов".<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - показать элемент управления, FALSE (default) - не показывать элемент управления.</li>
+					<li>options:
+						<ul>
+							<li><b><i>array</i></b> <b>position</b>: Положение элемента управления над картой. Задается в виде ассоциативного массива со следующими ключами:
+								<ul>
+									<li>top - отступ от верхнего края контейнера карты в пикселах;</li>
+									<li>right - отступ от правого края контейнера карты в пикселах;</li>
+									<li>bottom - отступ от нижнего края контейнера карты в пикселах;</li>
+									<li>left - отступ от левого края контейнера карты в пикселах.</li>
+								</ul>
+							Если при этом заданы одновременно и top, и bottom, то значение bottom игнорируется. Аналогично, если заданы одновременно и left, и right, то значение right игнорируется. Значение по умолчанию: <b><i>array</i></b> ("top"=&gt; 5, "left"=&gt; 98).
+							</li>
+						</ul>	
+					</li>
+				</ul>
+			</li>
+			<li>scaleLine: элемент управления "Масштабная линейка".<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - показать элемент управления, FALSE (default) - не показывать элемент управления.</li>
+					<li>options:
+						<ul>
+							<li><b><i>array</i></b> <b>position</b>: Положение элемента управления над картой. Задается в виде ассоциативного массива со следующими ключами:
+								<ul>
+									<li>top - отступ от верхнего края контейнера карты в пикселах;</li>
+									<li>right - отступ от правого края контейнера карты в пикселах;</li>
+									<li>bottom - отступ от нижнего края контейнера карты в пикселах;</li>
+									<li>left - отступ от левого края контейнера карты в пикселах.</li>
+								</ul>
+							Если при этом заданы одновременно и top, и bottom, то значение bottom игнорируется. Аналогично, если заданы одновременно и left, и right, то значение right игнорируется. Значение по умолчанию: <b><i>array</i></b> ("right"=&gt; 7, "bottom"=&gt; 50).
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li>searchControl: элемент управления "Поиск по карте".<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - показать элемент управления, FALSE (default) - не показывать элемент управления.</li>
+					<li>options:
+						<ul>
+							<li><b><i>array</i></b> <b>boundedBy</b>: прямоугольная область на карте, где предположительно находится искомый объект. При ранжировании объекты, находящиеся внутри указанной области, будут получать больший приоритет.</li>
+							<li><b><i>string</i></b> <b>kind</b>: вид топонима (только для обратного геокодирования). Список возможных значений:
+								<ul>
+								<li>house - дом;</li>
+								<li>street - улица;</li>
+								<li>metro - станция метро;</li>
+								<li>district - район города;</li>
+								<li>locality - населенный пункт (город/поселок/деревня/село/...).</li>
+								</ul>
+							Значение по умолчанию: 'house'.</li>
+							<li><b><i>bool</i></b> <b>noCentering</b>: false - автоматически располагать центр карты так, чтобы объект был виден целиком. true - не изменять центр карты при показе найденного объекта. Значение по умолчанию: false.</li>
+							<li><b><i>bool</i></b> <b>noPlacemark</b>: false - автоматически добавлять в центр найденного объекта метку с открытым балуном, true - не добавлять. Если указать noCentering = true и noPlacemark = true, то при щелчке по результату поиска никаких видимых изменений на карте не произойдет. Значение по умолчанию: false.</li>
+							<li><b><i>bool</i></b> <b>noPopup</b>: true - не показывать выпадающий список результатов, false - показывать. Значение по умолчанию: false.</li>
+							<li><b><i>array</i></b> <b>position</b>: Положение элемента управления над картой. Задается в виде ассоциативного массива со следующими ключами:
+								<ul>
+									<li>top - отступ от верхнего края контейнера карты в пикселах;</li>
+									<li>right - отступ от правого края контейнера карты в пикселах;</li>
+									<li>bottom - отступ от нижнего края контейнера карты в пикселах;</li>
+									<li>left - отступ от левого края контейнера карты в пикселах.</li>
+								</ul>
+							Если при этом заданы одновременно и top, и bottom, то значение bottom игнорируется. Аналогично, если заданы одновременно и left, и right, то значение right игнорируется. Значение по умолчанию: <b><i>array</i></b> ("top"=&gt; 5, "left"=&gt; 104).
+							</li>
+							<li><b><i>string</i></b> <b>provider</b>: провайдер геокодирования. Можно воспользоваться одним из стандартных провайдеров:
+								<ul>
+									<li>'yandex#map' - поиск по карте;</li>
+									<li>'yandex#publicMap'; - поиск по народной карте.</li>
+								</ul>
+								Значение по умолчанию: 'yandex#map'
+							</li>
+							<li><b><i>integer</i></b> <b>resultsPerPage</b>: количество результатов поиска на странице. Максимальное значение - 20. Значение по умолчанию: 3.</li>
+							<li><b><i>bool</i></b> <b>strictBounds</b>: искать только внутри области, заданной опцией boundedBy. Объекты вне указанной области попадать в выдачу не будут.</li>
+							<li><b><i>bool</i></b> <b>useMapBounds</b>: флаг, позволяющий учитывать при поиске границы видимой области карты. При значении true, рассчитанная область видимости имеет больший приоритет, чем заданная через boundedBy. Значение по умолчанию: false.</li>
+							<li><b><i>integer</i></b> <b>width</b>: ширина элемента (в пикселах). Минимальное значение: 200. Значение по умолчанию: 240</li>							
+						</ul>	
+					</li>
+				</ul>
+			</li>
+			<li>smallZoomControl: элемент управления "Простой элемент управления масштабом карты". Позволяет уменьшать или увеличивать коэффициент масштабирования карты на 1.<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - показать элемент управления, FALSE (default) - не показывать элемент управления.</li>
+					<li>options:
+						<ul>
+							<li><b><i>integer</i></b> <b>duration</b>: время анимации маштабирования карты, мс. Значение по умолчанию: 200.</li>
+							<li><b><i>array</i></b> <b>position</b>: Положение элемента управления над картой. Задается в виде ассоциативного массива со следующими ключами:
+								<ul>
+									<li>top - отступ от верхнего края контейнера карты в пикселах;</li>
+									<li>right - отступ от правого края контейнера карты в пикселах;</li>
+									<li>bottom - отступ от нижнего края контейнера карты в пикселах;</li>
+									<li>left - отступ от левого края контейнера карты в пикселах.</li>
+								</ul>
+							Если при этом заданы одновременно и top, и bottom, то значение bottom игнорируется. Аналогично, если заданы одновременно и left, и right, то значение right игнорируется. Значение по умолчанию: <b><i>array</i></b> ("top"=&gt; 75, "left"=&gt; 5).
+							</li>
+						</ul>	
+					</li>	
+				</ul>
+			</li>
+			<li>trafficControl: Панель управления пробками на карте.<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - показать элемент управления, FALSE (default) - не показывать элемент управления.</li>
+					<li>state:
+						<ul>
+							<li><b><i>string</i></b> <b>providerKey</b>: ключ провайдера пробок, показываемых на карте.
+								<ul>
+									<li>'traffic#actual' - пробки "сейчас"</li>
+									<li>'traffic#archive' - пробки "обычно"</li>
+								</ul>
+								Значение по умолчанию: 'traffic#actual'.
+							</li>
+							<li><b><i>bool</i></b> shown: показаны ли данные по пробкам на карте. Значение по умолчанию: false.</li>
+						</ul>
+					</li>	
+					<li>options:
+						<ul>
+							<li><b><i>array</i></b> <b>position</b>: Положение элемента управления над картой. Задается в виде ассоциативного массива со следующими ключами:
+								<ul>
+									<li>top - отступ от верхнего края контейнера карты в пикселах;</li>
+									<li>right - отступ от правого края контейнера карты в пикселах;</li>
+									<li>bottom - отступ от нижнего края контейнера карты в пикселах;</li>
+									<li>left - отступ от левого края контейнера карты в пикселах.</li>
+								</ul>
+							Если при этом заданы одновременно и top, и bottom, то значение bottom игнорируется. Аналогично, если заданы одновременно и left, и right, то значение right игнорируется. Значение по умолчанию: <b><i>array</i></b> ("top"=&gt; 5, "right"=&gt; 120).
+							</li>
+						</ul>	
+					</li>	
+				</ul>
+			</li>
+			<li>typeSelector: элемент управления "Типы карты".<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - показать элемент управления, FALSE (default) - не показывать элемент управления.</li>
+					<li>params:
+						<ul>
+							<li><b><i>array</i></b> <b>mapTypes</b>: Массив конструкторов типов карты или ключей. Список доступных типов карты:
+								<ul>	
+									<li>'yandex#map' - тип карты "схема";</li>
+									<li>'yandex#satellite' - тип карты "спутник";</li>
+									<li>'yandex#hybrid' - тип карты "гибрид";</li>
+									<li>'yandex#publicMap' - тип карты "народная карта";</li>
+									<li>'yandex#publicMapHybrid' - тип карты "народный гибрид".</li>
+								</ul>
+								Ключи 'yandex#publicMap' и 'yandex#publicMapHybrid' доступны только для России и Украины.	
+							</li>
+						</ul>
+					</li>	
+					<li>options:
+						<ul>
+							<li><b><i>array</i></b> <b>position</b>: Положение элемента управления над картой. Задается в виде ассоциативного массива со следующими ключами:
+								<ul>
+									<li>top - отступ от верхнего края контейнера карты в пикселах;</li>
+									<li>right - отступ от правого края контейнера карты в пикселах;</li>
+									<li>bottom - отступ от нижнего края контейнера карты в пикселах;</li>
+									<li>left - отступ от левого края контейнера карты в пикселах.</li>
+								</ul>
+							Если при этом заданы одновременно и top, и bottom, то значение bottom игнорируется. Аналогично, если заданы одновременно и left, и right, то значение right игнорируется. Значение по умолчанию: <b><i>array</i></b> ("top"=&gt; 5, "right"=&gt; 5).
+							</li>
+							<li><b><i>bool</i></b> <b>fixTitle</b>: Флаг, отвечающий за поведение заголовка элемента управления.
+								<ul>
+									<li>true - заголовок элемента управления не изменяется при смене типа карты;</li>
+									<li>false - заголовок элемента управления изменяется в соответствии с выбранным типом карты.</li>
+								</ul>
+							Значение по умолчанию: false.	
+							</li>
+						</ul>	
+					</li>	
+				</ul>
+			</li>
+			<li>zoomControl: элемент управления "Ползунок масштаба".<br>
+			Параметры:
+				<ul>
+					<li><b><i>bool</i></b> <b>enabled</b>: TRUE - показать элемент управления, FALSE (default) - не показывать элемент управления.</li>
+					<li>options:
+						<ul>
+							<li><b><i>bool</i></b> <b>noTips</b>: включает/выключает показ всплывающих подсказок: true - подсказки выключены, false - включены. Подсказки показываются в стороне от шкалы масштаба при наведении на нее курсора мыши. Значение по умолчанию: false.</li>
+							<li><b><i>array</i></b> <b>position</b>: Положение элемента управления над картой. Задается в виде ассоциативного массива со следующими ключами:
+								<ul>
+									<li>top - отступ от верхнего края контейнера карты в пикселах;</li>
+									<li>right - отступ от правого края контейнера карты в пикселах;</li>
+									<li>bottom - отступ от нижнего края контейнера карты в пикселах;</li>
+									<li>left - отступ от левого края контейнера карты в пикселах.</li>
+								</ul>
+							Если при этом заданы одновременно и top, и bottom, то значение bottom игнорируется. Аналогично, если заданы одновременно и left, и right, то значение right игнорируется. Значение по умолчанию: <b><i>array</i></b> ("top"=&gt; 75, "left"=&gt; 5).
+							</li>
+						</ul>	
+					</li>	
+				</ul>
+			</li>
+		</ul>
+	</li>	
+</ul>
+<h4>Методы</h4>
+<ul>
+	<li><pre class="php" style="font-family:monospace;">YMap<span style="color: #339933;">::</span><span style="color: #004000;">create</span><span style="color: #009900;">&#40;</span>float <span style="color: #000088;">$longtitude</span><span style="color: #339933;">,</span> float <span style="color: #000088;">$latitude</span><span style="color: #339933;">,</span> integer <span style="color: #000088;">$zoom</span><span style="color: #339933;">,</span> string <span style="color: #000088;">$type</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre> 
+	Создаёт карту в родительском блоке с заданными координатами.<br>
+	Параметры:
+		<ul>
+			<li><b><i>float</i></b> $longtitude - долгота центра карты.</li>
+			<li><b><i>float</i></b> $latitude - широта центра карты.</li>
+			<li><b><i>integer</i></b> $zoom - приближение карты.</li>
+			<li><b><i>string</i></b> $type - тип карты.</li>
+		</ul>	
+	Параметры могут быть опущены для использования соответствующих значений, установленных ранее функцией parameters. Если параметры не были установлены, используются значения по умолчанию:<br>
+	Для долготы и широты будут использоваться координаты местонахождения пользователя, определённые по IP. Для приближения - среднее доступное приближение (12) либо максимальное приближение, рассчитанное по определённому IP пользователя. Для типа - тип "схема".
+	</li>
+	<li><pre class="php" style="font-family:monospace;">YMap<span style="color: #339933;">::</span><span style="color: #004000;">set_parameters</span><span style="color: #009900;">&#40;</span>float <span style="color: #000088;">$longtitude</span><span style="color: #339933;">,</span> float <span style="color: #000088;">$latitude</span><span style="color: #339933;">,</span> integer <span style="color: #000088;">$zoom</span><span style="color: #339933;">,</span> string <span style="color: #000088;">$type</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
+	Устанавливает параметры карты. Если карта уже создана - меняет её параметры на указанные.<br>
+	Параметры:
+		<ul>
+			<li><b><i>float</i></b> $longtitude - долгота центра карты.</li>
+			<li><b><i>float</i></b> $latitude - широта центра карты.</li>
+			<li><b><i>integer</i></b> $zoom - приближение карты.</li>
+			<li><b><i>string</i></b> $type - тип карты.</li>
+		</ul>
+	</li>
+	<li><pre class="php" style="font-family:monospace;">YMap<span style="color: #339933;">::</span><span style="color: #004000;">balloon</span><span style="color: #009900;">&#40;</span>Balloon <span style="color: #000088;">$balloon</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre> 
+	Создаёт на карте балун без привязки к геообъекту.<br>
+	Параметры:
+		<ul>
+			<li>Balloon $balloon - экземпляр класса Balloon.</li>
+		</ul>
+	</li>
+	<li><pre class="php" style="font-family:monospace;">YMap<span style="color: #339933;">::</span><span style="color: #004000;">placemark</span><span style="color: #009900;">&#40;</span>Placemark <span style="color: #000088;">$placemark</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
+	Создаёт на карте геообъект отметки.<br>
+	Параметры:
+		<ul>
+			<li>Placemark $placemark - экземпляр класса Placemark.</li>
+		</ul>
+	</li>
+	<li><pre class="php" style="font-family:monospace;">YMap<span style="color: #339933;">::</span><span style="color: #004000;">draw</span><span style="color: #009900;">&#40;</span><span style="color: #000088;">$return</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
+	Вставляет код сгенерированной карты.<br>
+	Если $this-&gt;options["init"] установлен в 2, функция не выводит сгенерированный код, а ведёт себя так, как будто параметр $return установлен в TRUE.<br>
+	Параметры:
+		<ul>
+			<li><b><i>bool</i></b> $return - TRUE: Функция возвращает сгенерированный JS-код, FALSE (default) - функция выводит сгенерированный JS-код После вызова функции буфер сгенерированного кода всегда сбрасывается!</li>
+		</ul>
+	</li>
+</ul>
+
+<h2>Балун</h2>
+Балун - всплывающее облако, которое может отображать любое HTML-содержимое. Может быть создано как для самостоятельного использования, так и для включения в составной объект, например Placemark. Объект реализован классом Balloon. Пример:<br>
+<pre class="php" style="font-family:monospace;"><span style="color: #000088;">$balloon</span><span style="color: #339933;">=</span><span style="color: #000000; font-weight: bold;">new</span> Balloon<span style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
+
+<h4>Свойства</h4>
+<ul>
+	<li><b><i>array</i></b> coordinates: координаты появления балуна. Если не заданы, используются координаты центра карты.</li>
+	<li>data:
+		<ul>
+			<li><b><i>string</i></b> content: содержимое тела балуна.</li>
+			<li><b><i>string</i></b> contentBody: содержимое основой части балуна.</li>
+			<li><b><i>string</i></b> contentHeader: содержимое заголовка балуна.</li>
+			<li><b><i>string</i></b> contentFooter: содержимое нижней части балуна.</li>
+		</ul>
+		Поле content является кратким обозначением для поля contentBody, но при одновременном задании contentBody более приоритетен.<br>
+		Во всех полях может использоваться любое HTML-содержимое. По умолчанию все поля не заданы.
+	</li>
+	<li>options:
+		<ul>
+			<li><b><i>bool</i></b> autoPan: сдвигать карту, чтобы отобразить открывшийся балун. Значение по умолчанию: true.</li>
+			<li><b><i>integer</i></b> autoPanDuration: длительность перемещения к точке балуна (в мс). Значение по умолчанию: 500.</li>
+			<li><b><i>integer</i></b> autoPanMargin: отступ от угла viewport-а карты при действии autoPan.</li>
+			<li><b><i>bool</i></b> closeButton: флаг наличия кнопки закрытия. Значение по умолчанию: true.</li>
+			<li><b><i>string</i></b> interactivityModel: ключ модели интерактивности. Доступные ключи и их значения:
+				<ul>
+					<li>'default#opaque' - объект получает все DOM-события и не прокидывает их на карту. Поведения карты не будут работать при наведении или клике на объекты с данной моделью интерактивности.</li>
+					<li>'default#geoObject' - объект получает все DOM-события. На карту прокидываются события 'wheel' и 'mousedown'. У события 'mousedown' выставляется флаг 'preventDefault'=true. Если на карте включены поведения 'scrollZoom' или 'magnifier', они будут работать через объекты с данной моделью интерактивности, в отличие от объектов с моделью 'default#opaque'.</li>
+					<li>'default#layer' - объект получает все DOM-события. На карту прокидываются события 'wheel' и 'mousedown'. Если на карте включены поведения 'scrollZoom', 'drag' или 'magnifier', они будут работать через объекты с данной моделью интерактивности.</li>
+					<li>'default#transparent' - объект получает все DOM-события, а затем прокидывает их на карту.</li>
+				</ul>
+			Значение по умолчанию: 'default#opaque'.
+			</li>
+			<li><b><i>integer</i></b> maxHeight: максимальная высота, в пикселах.</li>
+			<li><b><i>integer</i></b> maxWidth: максимальная ширина, в пикселах.</li>
+			<li><b><i>integer</i></b> minHeight</li>
+			<li><b><i>integer</i></b> minWidth: минимальная высота, в пикселах.</li>
+			<li><b><i>integer</i></b> offset: минимальная ширина, в пикселах.</li>
+			<li><b><i>bool</i></b> shadow: флаг наличия тени. Значение по умолчанию: true</li>		
+		</ul>
+	</li>
+</ul>
+
+<h4>Методы</h4>
+<ul>
+	<li><pre class="php" style="font-family:monospace;">Balloon<span style="color: #339933;">::</span><span style="color: #004000;">SetData</span><span style="color: #009900;">&#40;</span>string <span style="color: #000088;">$contentBody</span><span style="color: #339933;">,</span> string <span style="color: #000088;">$contentHeader</span><span style="color: #339933;">,</span> string <span style="color: #000088;">$contentFooter</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
+	Задаёт полное содержимое балуна.<br>
+	Параметры:
+		<ul>
+			<li><b><i>string</i></b> $contentBody - задаёт поле contentBody.</li>
+			<li><b><i>string</i></b> $contentHeader - задаёт поле contentHeader.</li>
+			<li><b><i>string</i></b> $contentFooter - задаёт поле contentFooter.</li>
+		</ul>
+	</li>	
+</ul>
+
+<h2>Хинт</h2>
+Хинт - всплывающая подсказка, которая может отображать любое HTML-содержимое. Создаётся для включения в составные объекты, например Placemark. Объект реализован классом Hint.<br>
+При создании объекта ему может быть передан параметр $content, отвечающий за содержимое подсказки. Пример:<br>
+<pre class="php" style="font-family:monospace;"><span style="color: #000088;">$hint</span><span style="color: #339933;">=</span><span style="color: #000000; font-weight: bold;">new</span> Hint<span style="color: #009900;">&#40;</span><span style="color: #0000ff;">'Это подсказка'</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
+В текущей версии фреймворка хинт не может быть создан для самостоятельного отображения, и нужен только для задания соответствующего свойства у маркеров. 
+
+<h4>Свойства</h4>
+
+<ul>
+	<li><b><i>string</i></b> content: содержимое подсказки. В качестве содержимого может использоваться любой HTML-код. По умолчанию поле не задано.</li>
+	<li>options:
+		<ul>
+			<li><b><i>bool</i></b> fitPane: флаг, заставляющий хинт сдвигать свою позицию, чтобы не выходить за границы контейнера. Значение по умолчанию: true.</li>
+			<li><b><i>integer</i></b> hideTimeOut: задержка закрытия (в мс). Значение по умолчанию: 700.</li>
+			<li><b><i>bool</i></b> holdByMouse: флаг, оменяющий закрытие хинта, находящегося под курсором. Значение по умолчанию: true.</li>
+			<li><b><i>string</i></b> interactivityModel: ключ модели интерактивности. Доступные ключи и их значения:
+				<ul>
+					<li>'default#opaque' - объект получает все DOM-события и не прокидывает их на карту. Поведения карты не будут работать при наведении или клике на объекты с данной моделью интерактивности.</li>
+					<li>'default#geoObject' - объект получает все DOM-события. На карту прокидываются события 'wheel' и 'mousedown'. У события 'mousedown' выставляется флаг 'preventDefault'=true. Если на карте включены поведения 'scrollZoom' или 'magnifier', они будут работать через объекты с данной моделью интерактивности, в отличие от объектов с моделью 'default#opaque'.</li>
+					<li>'default#layer' - объект получает все DOM-события. На карту прокидываются события 'wheel' и 'mousedown'. Если на карте включены поведения 'scrollZoom', 'drag' или 'magnifier', они будут работать через объекты с данной моделью интерактивности.</li>
+					<li>'default#transparent' - объект получает все DOM-события, а затем прокидывает их на карту.</li>
+				</ul>
+			Значение по умолчанию: 'default#opaque'.
+			</li>
+			<li><b><i>integer</i></b> showTimeout: задержка открытия (в мс). Значение по умолчанию: 150.</li>
+		</ul>
+	</li>
+</ul>
+
+<h2>Маркер</h2>
+Placemark или маркер - точечная отметка на карте. Объект реализован классом Placemark и является потомком класса GeoObject с принудительно установленным свойством Geometry-&gt;type='point'.<br>
+При создании объекта ему могут быть переданы координаты положения. Пример:<br>
+<pre class="php" style="font-family:monospace;"><span style="color: #000088;">$placemark</span><span style="color: #339933;">=</span><span style="color: #000000; font-weight: bold;">new</span> Placemark<span style="color: #009900;">&#40;</span><span style="color:#800080;">55.7</span><span style="color: #339933;">,</span><span style="color:#800080;">37.615564701</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
+
+<h4>Свойства</h4>
+
+<ul>
+	<li>feature
+		<ul>
+			<li>properties:
+				<ul>
+					<li><b><i>string</i></b> <b>iconContent:</b> содержимое иконки геообъекта.</li>
+					<li><b><i>string</i></b> <b>hintContent:</b> содержимое всплывающей подсказки геообъекта.</li>
+					<li><b><i>string</i></b> <b>balloonContent:</b> содержимое балуна геообъекта.</li>
+					<li><b><i>string</i></b> <b>balloonContentHeader:</b> содержимое заголовка балуна геообъекта.</li>
+					<li><b><i>string</i></b> <b>balloonContentBody:</b> содержимое основой части балуна геообъекта.</li>
+					<li><b><i>string</i></b> <b>balloonContentFooter:</b> содержимое нижней части балуна геообъекта.</li>
+				</ul>
+				Поле balloonContent является кратким обозначением для поля balloonContentBody, но при одновременном задании balloonContentBody более приоритетен.
+			</li>
+		</ul>
+	
+	</li>
+	<li>options
+		<ul>
+			<li><b><i>string</i></b> <b>cursor:</b> вид курсора над геообъектом. Значение по умолчанию: "pointer".</li>
+			<li><b><i>bool</i></b> <b>draggable:</b> определяет возможность перетаскивания геообъекта. Значение по умолчанию: false.</li>
+			<li><b><i>bool</i></b> <b>fill:</b> наличие заливки фигуры. Значение по умолчанию: true.</li>
+			<li><b><i>string</i></b> <b>fillColor:</b> цвет заливки. Значение по умолчанию: "0066ff99".</li>
+			<li><b><i>integer</i></b> <b>fillOpacity:</b> прозрачность заливки. Значение по умолчанию: 1.</li>
+			<li><b><i>bool</i></b> <b>hasBallon:</b> определяет наличие поля balloon у геообъекта. Значение по умолчанию: true.</li>
+			<li><b><i>bool</i></b> <b>hasHint:</b> определяет наличие поля hint у геообъекта. Значение по умолчанию: true.</li>
+			<li><b><i>bool</i></b> <b>hideIconOnBalloonOpen:</b> скрывать иконку при открытии балуна. Значение по умолчанию: true.</li>
+			<li><b><i>string</i></b> <b>iconColor:</b> цвет иконки (для растягивающихся под содержимое иконок).</li>
+			<li><b><i>array</i></b> <b>iconContentOffset:</b> пиксельный сдвиг содержимого иконки относительно родительского элемента.</li>
+			<li><b><i>array</i></b> <b>iconContentPadding:</b> отступ для содержимого в иконке.</li>
+			<li><b><i>array</i></b> <b>iconContentSize:</b> размер содержимого.</li>
+			<li><b><i>array</i></b> <b>iconImageClipRect:</b> прямоугольная область (указывается левый верхний и правый нижний углы), которая будет вырезана из исходного графического файла и смасштабирована под размеры иконки (например для использования спрайтов). По умолчанию исходная картинка подставляется полностью.</li>
+			<li><b><i>string</i></b> <b>iconImageHref:</b> URL графического файла иконки.</li>
+			<li><b><i>string</i></b> <b>iconImageOffset:</b> пиксельный сдвиг изображения иконки внутри родительского элемента.</li>
+			<li><b><i>string</i></b> <b>iconImageSize:</b> размер иконки в пикселах.</li>
+			<li><b><i>string</i></b> <b>iconMaxHeight:</b> максимальная высота иконки с содержимым. Параметр задаётся в виде значения CSS-стиля, например '1em' или '10px'.</li>
+			<li><b><i>string</i></b> <b>iconMaxWidth:</b> минимальная высота иконки с содержимым. Параметр задаётся в виде значения CSS-стиля, например '1em' или '10px'.</li>
+			<li><b><i>array</i></b> <b>iconOffset:</b> пиксельное смещение иконки относительно заданной позиции.</li>
+			<li><b><i>bool</i></b> <b>iconShadow:</b> флаг наличия тени у иконки. Значение по умолчанию: false.</li>
+			<li><b><i>string</i></b> <b>iconShadowImageHref:</b> URL графического файла тени иконки.</li>
+			<li><b><i>string</i></b> <b>iconShadowImageOffset:</b> пиксельный сдвиг изображения тени иконки внутри родительского элемента.</li>
+			<li><b><i>string</i></b> <b>iconShadowImageSize:</b> размер тени иконки.</li>
+			<li><b><i>string</i></b> <b>iconShadowOffset:</b> пиксельное смещение тени иконки относительно заданной позиции.</li>
+			<li><b><i>string</i></b> <b>interactivityModel:</b> ключ модели интерактивности. Доступные ключи и их значения:
+				<ul>
+					<li>'default#opaque' - объект получает все DOM-события и не прокидывает их на карту. Поведения карты не будут работать при наведении или клике на объекты с данной моделью интерактивности.</li>
+					<li>'default#geoObject' - объект получает все DOM-события. На карту прокидываются события 'wheel' и 'mousedown'. У события 'mousedown' выставляется флаг 'preventDefault'=true. Если на карте включены поведения 'scrollZoom' или 'magnifier', они будут работать через объекты с данной моделью интерактивности, в отличие от объектов с моделью 'default#opaque'.</li>
+					<li>'default#layer' - объект получает все DOM-события. На карту прокидываются события 'wheel' и 'mousedown'. Если на карте включены поведения 'scrollZoom', 'drag' или 'magnifier', они будут работать через объекты с данной моделью интерактивности.</li>
+					<li>'default#transparent' - объект получает все DOM-события, а затем прокидывает их на карту.</li>
+				</ul>
+			Значение по умолчанию: 'default#geoObject'.
+			</li>
+			<li><b><i>integer</i></b> <b>opacity:</b> прозрачность. Значение по умолчанию: 1.</li>
+			<li><b><i>bool</i></b> <b>openBalloonOnClick:</b> определяет показывать ли балун при щелчке на геообъекте. Значение по умолчанию: true.</li>
+			<li><b><i>bool</i></b> <b>openEmptyBalloon:</b> определяет показывать ли пустой балун при щелчке на геообъекте. Значение по умолчанию: false.</li>
+			<li><b><i>string</i></b> <b>preset:</b> ключ предустановленных опций геообъекта. Список доступных ключей содержится в <a href='http://api.yandex.ru/maps/doc/jsapi/2.x/ref/reference/option.presetStorage.xml'>соответствующем описании</a> API Яндекс.Карт.</li>
+			<li><b><i>bool</i></b> <b>showEmptyHint:</b> определяет показывать ли пустой хинт при наведении указателя мыши на геообъект. Значение по умолчанию: false.</li>
+			<li><b><i>bool</i></b> <b>showHintOnHover:</b> определяет показывать ли хинт при наведении указателя мыши на геообъект. Значение по умолчанию: true.</li>
+			<li><b><i>bool</i></b> <b>stroke:</b> наличие обводки фигуры. Значение по умолчанию: true.</li>
+			<li><b><i>string</i></b> <b>strokeColor:</b> цвет линии или обводки. Значение по умолчанию: "0066ffff".</li>
+			<li><b><i>integer</i></b> <b>strokeOpacity:</b> прозрачность линии или обводки. Значение по умолчанию: 1.</li>
+			<li><b><i>string</i></b> <b>strokeStyle:</b> стиль линии или обводки.</li>
+			<li><b><i>integer</i></b> <b>strokeWidth:</b> толщина линии или обводки. Значение по умолчанию: 1.</li>
+			<li><b><i>bool</i></b> <b>visible=:</b> определяет видимость геообъекта. Значение по умолчанию: true.</li>
+			<li><b><i>integer</i></b> <b>zIndex:</b> z-index геообъекта в обычном состоянии. Наименее приоритетный.</li>
+			<li><b><i>integer</i></b> <b>zIndexActive:</b> z-index геообъекта с открытым балуном. Наиболее приоритетный.</li>
+			<li><b><i>integer</i></b> <b>integer zIndexDrag:</b> z-index геообъекта при перетаскивании.</li>
+			<li><b><i>integer</i></b> <b>zIndexHover:</b> z-index геообъекта при наведении на него указателя мыши.</li>
+			<li><b>balloonOptions:</b> опции балуна геообъекта, соответствуют опциям объекта Balloon.</li>
+			<li><b>hintOptions:</b> опции хинта геообъекта, соответствуют опциям объекта Hint.</li>
+		</ul>
+	</li>
+</ul>
+
+<h4>Методы</h4>
+
+<ul>
+	<li><pre class="php" style="font-family:monospace;">Placemark<span style="color: #339933;">::</span><span style="color: #004000;">set_center</span><span style="color: #009900;">&#40;</span>float <span style="color: #000088;">$longtitude</span><span style="color: #339933;">,</span> float <span style="color: #000088;">$latitude</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
+		Задаёт положение маркера<br>
+		Параметры:
+		<ul>
+			<li>float $longtitude - долгота маркера.</li>
+			<li>float $latitude - широта маркера.</li>
+		</ul>
+	</li>
+	<li><pre class="php" style="font-family:monospace;">Placemark<span style="color: #339933;">::</span><span style="color: #004000;">set_balloon</span><span style="color: #009900;">&#40;</span>Balloon <span style="color: #000088;">$balloon</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
+		Привязывает балун к маркеру.<br>
+		Параметры:
+		<ul>
+			<li>Balloon $balloon - экземпляр класса Balloon.</li>
+		</ul>
+	</li>
+	<li><pre class="php" style="font-family:monospace;">Placemark<span style="color: #339933;">::</span><span style="color: #004000;">set_hint</span><span style="color: #009900;">&#40;</span>Hint <span style="color: #000088;">$hint</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
+		Привязывает хинт к маркеру<br>
+		Параметры:
+		<ul>
+			<li>Hint $hint  - экземпляр класса Hint.</li>
+		</ul>
+	</li>			
+</ul>
+
+
+
+</body>
+
+
+
+</html>
