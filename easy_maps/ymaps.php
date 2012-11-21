@@ -190,7 +190,6 @@ class YMap{
 				$return=TRUE;
 			break;
 		}
-
 		if ($return) return $js; else print ($js);
 		$this->jsbuff='';
 	}
