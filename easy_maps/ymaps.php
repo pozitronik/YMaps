@@ -201,7 +201,6 @@ class YMap{
 	function call(){
 		return ($this->jsbuff);
 	}
-
 }
 
 
